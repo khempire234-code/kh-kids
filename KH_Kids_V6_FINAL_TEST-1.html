@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="ms"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>K&H Kids V6 FINAL TEST — Belajar Seronok</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:linear-gradient(145deg,#bdefff,#ffe0ef);color:#24313d;min-height:100vh}
+.app{max-width:520px;margin:auto;padding:18px 14px 30px}header,.card{background:#fff;border-radius:28px;box-shadow:0 10px 30px #0001}
+header{text-align:center;padding:20px 18px}.logo{font-weight:1000;font-size:34px;letter-spacing:2px;color:#198fe8}.logo b{color:#ff6aa2}.tag{font-weight:800;color:#607080}.soundBtn{margin-top:10px;border:0;border-radius:18px;padding:9px 14px;background:#edf5ff;font-weight:900;cursor:pointer}
+.card{padding:18px;margin-top:15px}.menu{display:grid;gap:11px}.menu button,.answer,.next,.back{border:0;border-radius:20px;padding:17px;font-size:18px;font-weight:900;cursor:pointer}
+.menu button{text-align:left;background:#f2f7ff}.menu button span{font-size:28px;margin-right:10px}.menu small{display:block;margin-left:42px;color:#718096;font-weight:700}
+.top{display:flex;gap:8px}.stat{background:#f1f5fb;border-radius:16px;padding:9px;text-align:center;flex:1;font-weight:900}
+.progress{height:10px;background:#e8edf3;border-radius:20px;overflow:hidden;margin:12px 0 18px}.bar{height:100%;background:#4da7ed;width:0;transition:.3s}
+.question{border:3px dashed #ffd66e;border-radius:24px;padding:20px;text-align:center;background:#fffaf0}.animal{font-size:86px;line-height:1;margin:10px}
+.colorVisual{width:145px;height:145px;border-radius:32px;margin:12px auto;border:8px solid #fff;box-shadow:0 5px 18px #0002}
+.countVisual{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:5px;max-width:330px;min-height:150px;margin:8px auto;font-size:36px;line-height:1.05}
+.countVisual span{display:inline-block}.prompt{font-size:23px;font-weight:900;margin-top:8px}.learnLabel{font-size:30px;font-weight:1000;margin-top:8px;color:#198fe8}.sayBtn{border:0;border-radius:18px;padding:9px 14px;margin-top:10px;background:#fff0a8;font-weight:900;cursor:pointer}
+.answers{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+@media(max-width:380px){.countVisual{font-size:30px;gap:3px}.colorVisual{width:125px;height:125px}}.answer{background:#ffd1d7;min-height:68px}.answer:nth-child(2){background:#ffe0a8}.answer:nth-child(3){background:#c9f6b9}.answer:nth-child(4){background:#c7e5ff}
+.answer:disabled{opacity:.7}.correct{animation:pop .45s ease;box-shadow:0 0 0 7px #63e66b55}.wrong{animation:shake .35s ease}
+.next{width:100%;background:#42a1ea;color:#fff;margin-top:16px}.back{width:100%;background:#edf1f4;margin-top:10px}.hidden{display:none}.result{text-align:center;padding:20px}.badge{font-size:70px}
+@keyframes pop{50%{transform:scale(1.06)}}@keyframes shake{25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-4px)}}
+</style></head><body><div class="app">
+<header><div class="logo">K&H <b>KIDS</b></div><div class="tag">Belajar Seronok, Jadi Bijak! 🌟</div><button id="soundBtn" class="soundBtn" onclick="toggleSound()">🔊 Bunyi: ON</button></header>
+<section id="home" class="card"><div class="menu"><div style="text-align:center;font-weight:900;color:#607080;margin-bottom:4px">🌟 Dengar, lihat dan belajar bersama K&H Kids!</div>
+<button onclick="start('abc')">🔤 Jom Kenal ABC<small>Kenal huruf A hingga Z</small></button>
+<button onclick="start('nombor')">🔢 Jom Kenal Nombor<small>Kenal nombor 1 hingga 20</small></button>
+<button onclick="start('warna')">🎨 Jom Kenal Warna<small>Kenal warna-warna cantik</small></button>
+<button onclick="start('haiwan')">🐾 Jom Kenal Haiwan<small>Kenal haiwan di sekeliling kita</small></button>
+<button onclick="start('padankan')">🧩 Jom Padankan<small>Padankan gambar dan perkataan</small></button>
+</div></section>
+<section id="game" class="card hidden">
+<div class="top"><div class="stat">Soalan<br><span id="qno">1/10</span></div><div class="stat">⭐ <span id="stars">0</span></div><div class="stat">🏆 <span id="trophy">0</span></div></div>
+<div class="progress"><div id="bar" class="bar"></div></div><div id="question" class="question"></div><div id="answers" class="answers"></div>
+<button id="next" class="next hidden" onclick="nextQuestion()">Soalan Seterusnya ➜</button><button class="back" onclick="goHome()">🏠 Kembali ke Menu</button>
+</section>
+<section id="result" class="card hidden"><div class="result"><div class="badge">🎉</div><h2>Hebat!</h2><p id="resultText"></p>
+<button class="next" onclick="restart()">Main Lagi</button><button class="back" onclick="goHome()">🏠 Kembali ke Menu</button></div></section>
+</div>
+<script>
+const animalArt = {"Kucing": "<svg viewBox=\"0 0 600 430\" class=\"animalPhoto\" role=\"img\" aria-label=\"Gambar haiwan\">\n<rect width=\"600\" height=\"430\" rx=\"28\" fill=\"#e7f7ff\"/>\n<circle cx=\"500\" cy=\"70\" r=\"38\" fill=\"#ffe47b\"/>\n<path d=\"M0 300Q150 255 300 305T600 292V430H0Z\" fill=\"#78c957\"/>\n<text x=\"300\" y=\"250\" text-anchor=\"middle\" dominant-baseline=\"middle\" font-size=\"190\">🐱</text>\n<text x=\"300\" y=\"405\" text-anchor=\"middle\" font-size=\"22\" font-weight=\"800\" fill=\"#674c5a\">Gambar haiwan</text>\n</svg>", "Anjing": "<svg viewBox=\"0 0 600 430\" class=\"animalPhoto\" role=\"img\" aria-label=\"Gambar haiwan\">\n<rect width=\"600\" height=\"430\" rx=\"28\" fill=\"#fff1df\"/>\n<circle cx=\"500\" cy=\"70\" r=\"38\" fill=\"#ffe47b\"/>\n<path d=\"M0 300Q150 255 300 305T600 292V430H0Z\" fill=\"#78c957\"/>\n<text x=\"300\" y=\"250\" text-anchor=\"middle\" dominant-baseline=\"middle\" font-size=\"190\">🐶</text>\n<text x=\"300\" y=\"405\" text-anchor=\"middle\" font-size=\"22\" font-weight=\"800\" fill=\"#68472f\">Gambar haiwan</text>\n</svg>", "Gajah": "<svg viewBox=\"0 0 600 430\" class=\"animalPhoto\" role=\"img\" aria-label=\"Gambar haiwan\">\n<rect width=\"600\" height=\"430\" rx=\"28\" fill=\"#e9f2f7\"/>\n<circle cx=\"500\" cy=\"70\" r=\"38\" fill=\"#ffe47b\"/>\n<path d=\"M0 300Q150 255 300 305T600 292V430H0Z\" fill=\"#78c957\"/>\n<text x=\"300\" y=\"250\" text-anchor=\"middle\" dominant-baseline=\"middle\" font-size=\"190\">🐘</text>\n<text x=\"300\" y=\"405\" text-anchor=\"middle\" font-size=\"22\" font-weight=\"800\" fill=\"#506a79\">Gambar haiwan</text>\n</svg>", "Ikan": "<svg viewBox=\"0 0 600 430\" class=\"animalPhoto\" role=\"img\" aria-label=\"Gambar haiwan\">\n<rect width=\"600\" height=\"430\" rx=\"28\" fill=\"#dff7ff\"/>\n<circle cx=\"500\" cy=\"70\" r=\"38\" fill=\"#ffe47b\"/>\n<path d=\"M0 300Q150 255 300 305T600 292V430H0Z\" fill=\"#78c957\"/>\n<text x=\"300\" y=\"250\" text-anchor=\"middle\" dominant-baseline=\"middle\" font-size=\"190\">🐟</text>\n<text x=\"300\" y=\"405\" text-anchor=\"middle\" font-size=\"22\" font-weight=\"800\" fill=\"#27647b\">Gambar haiwan</text>\n</svg>", "Rusa": "<svg viewBox=\"0 0 600 430\" class=\"animalPhoto\" role=\"img\" aria-label=\"Gambar haiwan\">\n<rect width=\"600\" height=\"430\" rx=\"28\" fill=\"#fff3d4\"/>\n<circle cx=\"500\" cy=\"70\" r=\"38\" fill=\"#ffe47b\"/>\n<path d=\"M0 300Q150 255 300 305T600 292V430H0Z\" fill=\"#78c957\"/>\n<text x=\"300\" y=\"250\" text-anchor=\"middle\" dominant-baseline=\"middle\" font-size=\"190\">🦌</text>\n<text x=\"300\" y=\"405\" text-anchor=\"middle\" font-size=\"22\" font-weight=\"800\" fill=\"#68472f\">Gambar haiwan</text>\n</svg>", "Singa": "<svg viewBox=\"0 0 600 430\" class=\"animalPhoto\" role=\"img\" aria-label=\"Gambar haiwan\">\n<rect width=\"600\" height=\"430\" rx=\"28\" fill=\"#fff0c4\"/>\n<circle cx=\"500\" cy=\"70\" r=\"38\" fill=\"#ffe47b\"/>\n<path d=\"M0 300Q150 255 300 305T600 292V430H0Z\" fill=\"#78c957\"/>\n<text x=\"300\" y=\"250\" text-anchor=\"middle\" dominant-baseline=\"middle\" font-size=\"190\">🦁</text>\n<text x=\"300\" y=\"405\" text-anchor=\"middle\" font-size=\"22\" font-weight=\"800\" fill=\"#8d6013\">Gambar haiwan</text>\n</svg>", "Arnab": "<svg viewBox=\"0 0 600 430\" class=\"animalPhoto\" role=\"img\" aria-label=\"Gambar haiwan\">\n<rect width=\"600\" height=\"430\" rx=\"28\" fill=\"#f4edff\"/>\n<circle cx=\"500\" cy=\"70\" r=\"38\" fill=\"#ffe47b\"/>\n<path d=\"M0 300Q150 255 300 305T600 292V430H0Z\" fill=\"#78c957\"/>\n<text x=\"300\" y=\"250\" text-anchor=\"middle\" dominant-baseline=\"middle\" font-size=\"190\">🐰</text>\n<text x=\"300\" y=\"405\" text-anchor=\"middle\" font-size=\"22\" font-weight=\"800\" fill=\"#80638d\">Gambar haiwan</text>\n</svg>", "Kuda": "<svg viewBox=\"0 0 600 430\" class=\"animalPhoto\" role=\"img\" aria-label=\"Gambar haiwan\">\n<rect width=\"600\" height=\"430\" rx=\"28\" fill=\"#f4e6d8\"/>\n<circle cx=\"500\" cy=\"70\" r=\"38\" fill=\"#ffe47b\"/>\n<path d=\"M0 300Q150 255 300 305T600 292V430H0Z\" fill=\"#78c957\"/>\n<text x=\"300\" y=\"250\" text-anchor=\"middle\" dominant-baseline=\"middle\" font-size=\"190\">🐴</text>\n<text x=\"300\" y=\"405\" text-anchor=\"middle\" font-size=\"22\" font-weight=\"800\" fill=\"#68472f\">Gambar haiwan</text>\n</svg>", "Lembu": "<svg viewBox=\"0 0 600 430\" class=\"animalPhoto\" role=\"img\" aria-label=\"Gambar haiwan\">\n<rect width=\"600\" height=\"430\" rx=\"28\" fill=\"#eef8ee\"/>\n<circle cx=\"500\" cy=\"70\" r=\"38\" fill=\"#ffe47b\"/>\n<path d=\"M0 300Q150 255 300 305T600 292V430H0Z\" fill=\"#78c957\"/>\n<text x=\"300\" y=\"250\" text-anchor=\"middle\" dominant-baseline=\"middle\" font-size=\"190\">🐮</text>\n<text x=\"300\" y=\"405\" text-anchor=\"middle\" font-size=\"22\" font-weight=\"800\" fill=\"#4b554b\">Gambar haiwan</text>\n</svg>", "Burung": "<svg viewBox=\"0 0 600 430\" class=\"animalPhoto\" role=\"img\" aria-label=\"Gambar haiwan\">\n<rect width=\"600\" height=\"430\" rx=\"28\" fill=\"#e8f7ff\"/>\n<circle cx=\"500\" cy=\"70\" r=\"38\" fill=\"#ffe47b\"/>\n<path d=\"M0 300Q150 255 300 305T600 292V430H0Z\" fill=\"#78c957\"/>\n<text x=\"300\" y=\"250\" text-anchor=\"middle\" dominant-baseline=\"middle\" font-size=\"190\">🐦</text>\n<text x=\"300\" y=\"405\" text-anchor=\"middle\" font-size=\"22\" font-weight=\"800\" fill=\"#3c6680\">Gambar haiwan</text>\n</svg>", "Panda": "<svg viewBox=\"0 0 600 430\" class=\"animalPhoto\" role=\"img\" aria-label=\"Gambar haiwan\">\n<rect width=\"600\" height=\"430\" rx=\"28\" fill=\"#edf8ef\"/>\n<circle cx=\"500\" cy=\"70\" r=\"38\" fill=\"#ffe47b\"/>\n<path d=\"M0 300Q150 255 300 305T600 292V430H0Z\" fill=\"#78c957\"/>\n<text x=\"300\" y=\"250\" text-anchor=\"middle\" dominant-baseline=\"middle\" font-size=\"190\">🐼</text>\n<text x=\"300\" y=\"405\" text-anchor=\"middle\" font-size=\"22\" font-weight=\"800\" fill=\"#3e4945\">Gambar haiwan</text>\n</svg>", "Zirafah": "<svg viewBox=\"0 0 600 430\" class=\"animalPhoto\" role=\"img\" aria-label=\"Gambar haiwan\">\n<rect width=\"600\" height=\"430\" rx=\"28\" fill=\"#fff1c8\"/>\n<circle cx=\"500\" cy=\"70\" r=\"38\" fill=\"#ffe47b\"/>\n<path d=\"M0 300Q150 255 300 305T600 292V430H0Z\" fill=\"#78c957\"/>\n<text x=\"300\" y=\"250\" text-anchor=\"middle\" dominant-baseline=\"middle\" font-size=\"190\">🦒</text>\n<text x=\"300\" y=\"405\" text-anchor=\"middle\" font-size=\"22\" font-weight=\"800\" fill=\"#916d15\">Gambar haiwan</text>\n</svg>"};
+const animals=[{name:"Kucing",icon:"🐱",letter:"K"},{name:"Anjing",icon:"🐶",letter:"A"},{name:"Gajah",icon:"🐘",letter:"G"},{name:"Ikan",icon:"🐟",letter:"I"},{name:"Rusa",icon:"🦌",letter:"R"},{name:"Singa",icon:"🦁",letter:"S"},{name:"Arnab",icon:"🐰",letter:"A"},{name:"Kuda",icon:"🐴",letter:"K"},{name:"Lembu",icon:"🐮",letter:"L"},{name:"Burung",icon:"🐦",letter:"B"},{name:"Panda",icon:"🐼",letter:"P"},{name:"Zirafah",icon:"🦒",letter:"Z"}];
+const letters="ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+const colors=[["Merah","#ef4444"],["Biru","#3b82f6"],["Kuning","#facc15"],["Hijau","#22c55e"],["Oren","#f97316"],["Ungu","#a855f7"],["Merah Jambu","#ec4899"],["Coklat","#a16207"]];
+let mode="abc",questions=[],index=0,score=0;
+function shuffle(a){return [...a].sort(()=>Math.random()-.5)}
+function unique(a){return [...new Set(a)]}
+function makeQuestions(m){
+ if(m==="abc")return shuffle(animals).slice(0,10).map(x=>{let w=shuffle(unique(animals.map(a=>a.letter).filter(l=>l!==x.letter))).slice(0,2);return{visual:x.icon,prompt:x.name+" bermula dengan huruf apa?",correct:x.letter,options:shuffle([x.letter,...w])}});
+ if(m==="haiwan")return shuffle(animals).slice(0,10).map(x=>{let w=shuffle(animals.filter(a=>a.name!==x.name)).slice(0,3).map(a=>a.name);return{visual:x.icon,prompt:"Apakah nama haiwan ini?",correct:x.name,options:shuffle([x.name,...w])}});
+ if(m==="warna")return shuffle(colors).map(c=>{
+ let w=shuffle(colors.filter(x=>x[0]!==c[0])).slice(0,3).map(x=>x[0]);
+ return{kind:"color",hex:c[1],prompt:"Apakah nama warna ini?",correct:c[0],options:shuffle([c[0],...w])}
+}).slice(0,8);
+ if(m==="nombor")return shuffle([...Array(20)].map((_,i)=>i+1)).slice(0,10).map(n=>{
+ let w=shuffle([...Array(20)].map((_,i)=>i+1).filter(x=>x!==n)).slice(0,3);
+ let pool=["🍎","⭐","🐟","🦋","🍓","🚗","🌸","🎈"];
+ let obj=pool[(n-1)%pool.length];
+ return{kind:"number",objects:Array(n).fill(obj),prompt:"Ada berapa "+(obj==="🍎"?"epal":obj==="⭐"?"bintang":obj==="🐟"?"ikan":obj==="🦋"?"rama-rama":obj==="🍓"?"strawberi":obj==="🚗"?"kereta":obj==="🌸"?"bunga":"belon")+"?",correct:String(n),options:shuffle([String(n),...w.map(String)])}
+});
+ return shuffle(animals).slice(0,10).map(x=>{let w=shuffle(animals.filter(a=>a.name!==x.name)).slice(0,3).map(a=>a.name);return{visual:x.icon,prompt:"Padankan gambar dengan nama yang betul.",correct:x.name,options:shuffle([x.name,...w])}});
+}
+
+let soundOn=true;
+function speak(text){
+ if(!soundOn || !("speechSynthesis" in window)) return;
+ speechSynthesis.cancel();
+ let u=new SpeechSynthesisUtterance(text);
+ u.lang="ms-MY";u.rate=.9;u.pitch=1.05;speechSynthesis.speak(u);
+}
+function beep(type){
+ if(!soundOn)return;
+ try{
+  const C=window.AudioContext||window.webkitAudioContext;if(!C)return;
+  const c=new C(),o=c.createOscillator(),g=c.createGain();
+  o.connect(g);g.connect(c.destination);
+  o.frequency.value=type==="good"?720:220;o.type="sine";
+  g.gain.setValueAtTime(.0001,c.currentTime);
+  g.gain.exponentialRampToValueAtTime(.12,c.currentTime+.02);
+  g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+.18);
+  o.start();o.stop(c.currentTime+.2);
+ }catch(e){}
+}
+function toggleSound(){
+ soundOn=!soundOn;
+ soundBtn.textContent=soundOn?"🔊 Bunyi: ON":"🔇 Bunyi: OFF";
+ if(!soundOn&&"speechSynthesis"in window)speechSynthesis.cancel();
+}
+
+function start(m){mode=m;questions=makeQuestions(m);index=0;score=0;home.classList.add("hidden");result.classList.add("hidden");game.classList.remove("hidden");render()}
+function render(){
+ let q=questions[index];
+ qno.textContent=(index+1)+"/"+questions.length;
+ stars.textContent=score;
+ trophy.textContent=Math.floor(score/3);
+ bar.style.width=(index/questions.length*100)+"%";
+
+ let label="";
+ if(mode==="haiwan") label="";
+ else if(mode==="warna") label=q.correct;
+ else if(mode==="nombor") label="";
+ else if(mode==="abc") label=q.correct;
+
+ let visual="";
+ if(q.kind==="color"){
+   visual='<div class="colorVisual" style="background:'+q.hex+'"></div>';
+ }else if(q.kind==="number"){
+   visual='<div class="countVisual">'+q.objects.map(x=>'<span>'+x+'</span>').join("")+'</div>';
+ }else{
+   visual='<div class="animal">'+q.visual+'</div>';
+ }
+ question.innerHTML=visual+
+   '<div class="learnLabel">'+label+'</div>'+
+   '<div class="prompt">'+q.prompt+'</div>'+
+   '<button class="sayBtn" onclick="speakLearning()">🔊 Dengar</button>';
+
+ answers.innerHTML="";
+ q.options.forEach(o=>{
+   let b=document.createElement("button");
+   b.className="answer";
+   b.textContent=o;
+   b.onclick=()=>answer(b,o,q.correct);
+   answers.appendChild(b);
+ });
+ next.classList.add("hidden");
+ setTimeout(()=>speakLearning(),150);
+}
+function speakLearning(){
+ let q=questions[index];
+ let text="";
+ if(mode==="abc") text=q.prompt;
+ else if(mode==="padankan") text=q.prompt;
+ else if(mode==="haiwan") text="Haiwan apakah ini?";
+ else if(mode==="warna") text="Apakah nama warna ini?";
+ else if(mode==="nombor") text="Kira objek di atas. Ada berapa?";
+ else text=q.prompt;
+ speak(text);
+}
+
+function answer(btn,chosen,correct){document.querySelectorAll(".answer").forEach(b=>b.disabled=true);if(String(chosen)===String(correct)){btn.classList.add("correct");score++;beep("good");setTimeout(()=>speak((mode==="abc"||mode==="padankan")?"Betul! "+correct+"! Hebat!":"Betul! Hebat!"),80)}else{btn.classList.add("wrong");[...document.querySelectorAll(".answer")].find(b=>String(b.textContent)===String(correct)).classList.add("correct");beep("bad");setTimeout(()=>speak("Tak apa, cuba lagi. Jawapannya "+correct+"."),80)}stars.textContent=score;trophy.textContent=Math.floor(score/3);next.classList.remove("hidden")}
+function nextQuestion(){index++;if(index>=questions.length)finish();else render()}
+function finish(){game.classList.add("hidden");result.classList.remove("hidden");resultText.textContent="Kamu dapat "+score+" daripada "+questions.length+" bintang! 🏆";beep("good");setTimeout(()=>speak(score===questions.length?"Hebat! Semua betul! Kamu memang bijak!":"Syabas! Teruskan belajar!"),120)}
+function restart(){start(mode)}function goHome(){game.classList.add("hidden");result.classList.add("hidden");home.classList.remove("hidden")}
+</script></body></html>
